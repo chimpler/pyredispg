@@ -57,7 +57,7 @@ class ClientConnection(object):
     def run(self):
         while True:
             instructions = self._resp_reader.read()
-            if not instructions:
+            if not instructions or instructions[0].lower() == 'quit':
                 break
 
             result = self._parse_command(instructions)

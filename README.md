@@ -57,7 +57,7 @@ config get			| :x:
 config rewrite			| :x:
 config set			| :x:
 config resetstat		| :x:
-dbsize				| :x:
+dbsize				| :white_check_mark:
 debug object			| :x:
 debug segfault			| :x:
 decr				| :x:
@@ -73,7 +73,7 @@ exists				| :white_check_mark:
 expire				| :x:
 expireat			| :x:
 flushall			| :white_check_mark:
-flushdb				| :x:
+flushdb				| :white_check_mark:
 geoadd				| :x:
 geohash				| :x:
 geopos				| :x:
@@ -84,20 +84,20 @@ get				| :white_check_mark:
 getbit				| :x:
 getrange			| :x:
 getset				| :x:
-hdel				| :x:
+hdel				| :white_check_mark:
 hexists				| :white_check_mark:
 hget				| :white_check_mark:
 hgetall				| :white_check_mark:
 hincrby				| :x:
 hincrbyfloat			| :x:
-hkeys				| :x:
-hlen				| :x:
+hkeys				| :white_check_mark:
+hlen				| :white_check_mark:
 hmget				| :x:
 hmset				| :x:
 hset				| :white_check_mark:
 hsetnx				| :x:
 hstrlen				| :x:
-hvals				| :x:
+hvals				| :white_check_mark:
 incr				| :x:
 incrby				| :x:
 incrbyfloat			| :x:
@@ -135,7 +135,7 @@ pubsub				| :x:
 pttl				| :x:
 publish				| :x:
 punsubscribe			| :x:
-quit				| :x:
+quit				| :white_check_mark:
 randomkey			| :x:
 readonly			| :x:
 readwrite			| :x:
@@ -149,7 +149,7 @@ rpush				| :x:
 rpushx				| :x:
 sadd				| :white_check_mark:
 save				| :x:
-scard				| :x:
+scard				| :white_check_mark:
 script debug			| :x:
 script exists			| :x:
 script flush			| :x:
@@ -158,7 +158,7 @@ script load			| :x:
 sdiff				| :x:
 sdiffstore			| :x:
 select				| :white_check_mark:
-set				| :white_check_mark:
+set				| :white_check_mark: (TODO expire)
 setbit				| :x:
 setex				| :x:
 setnx				| :x:
@@ -181,7 +181,7 @@ sunion				| :x:
 sunionstore			| :x:
 swapdb				| :x:
 sync				| :x:
-time				| :x:
+time				| :white_check_mark:
 touch				| :x:
 ttl				| :x:
 type				| :x:
@@ -215,4 +215,5 @@ sscan				| :x:
 hscan				| :x:
 zscan				| :x:
 
-Improve `command` to return only commands implemented in redis wrapper.
+* Improve `command` to return only commands implemented in redis wrapper.
+* Use SQL migration tool

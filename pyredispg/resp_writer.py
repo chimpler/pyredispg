@@ -25,13 +25,13 @@ class RespWriter(object):
     def write(self, e):
         if e is None:
             self.write_null()
-        elif isinstance(e, int):
+        elif isinstance(e, (int, long)):
             self.write_integer(e)
         elif isinstance(e, list):
             self.write_array(e)
-        elif e[0] == '-' and '\n' not in e:
+        elif e and e[0] == '-' and '\n' not in e:
             self.write_error(e[1:])
-        elif e[0] == '+' and '\n' not in e:
+        elif e and e[0] == '+' and '\n' not in e:
             self.write_simple_string(e[1:])
         else:
             self.write_bulk_string(e)

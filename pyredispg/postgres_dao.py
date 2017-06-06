@@ -73,6 +73,12 @@ class PostgresDao(object):
             cursor.execute("SELECT skey FROM key_entries WHERE db=%s AND skey ILIKE %s", (db, pattern.replace('*', '%'),))
             return [key for [key] in cursor]
 
+    def dbsize(self):
+        with self._conn.cursor() as cursor:
+            cursor.execute("SELECT COUNT(1) FROM key_entries")
+            row = cursor.fetchone()
+            return row[0] if row else 0
+
     def _add_key(self, db, key, key_type):
         with self._conn.cursor() as cursor:
             query = """
@@ -146,6 +152,22 @@ class PostgresDao(object):
             row = cursor.fetchone()
             return row is not None
 
+    def hdel(self, db, key, hkey):
+        row_id = self._get_id(db, key, self.TYPE_HASH)
+
+        with self._conn.cursor() as cursor:
+            query = """
+                DELETE FROM hashmap
+                WHERE
+                  id = %(id)s AND 
+                  hkey = %(hkey)s
+            """
+            cursor.execute(query, {
+                'id': row_id,
+                'hkey': hkey
+            })
+            return cursor.rowcount == 1
+
     def hgetall(self, db, key):
         row_id = self._get_id(db, key, self.TYPE_HASH)
 
@@ -160,6 +182,36 @@ class PostgresDao(object):
                 'id': row_id,
             })
             return [KeyValue(row[0], row[1]) for row in cursor]
+
+    def hkeys(self, db, key):
+        row_id = self._get_id(db, key, self.TYPE_HASH)
+
+        with self._conn.cursor() as cursor:
+            query = """
+                SELECT hkey
+                FROM hashmap
+                WHERE
+                  id = %(id)s
+            """
+            cursor.execute(query, {
+                'id': row_id,
+            })
+            return [row[0] for row in cursor]
+
+    def hvals(self, db, key):
+        row_id = self._get_id(db, key, self.TYPE_HASH)
+
+        with self._conn.cursor() as cursor:
+            query = """
+                SELECT value
+                FROM hashmap
+                WHERE
+                  id = %(id)s
+            """
+            cursor.execute(query, {
+                'id': row_id,
+            })
+            return [row[0] for row in cursor]
 
     def hlen(self, db, key):
         row_id = self._get_id(db, key, self.TYPE_HASH)
@@ -215,6 +267,18 @@ class PostgresDao(object):
             cursor.execute(query, {'id': row_id})
             return [skey for [skey] in cursor.fetchall()]
 
+    def scard(self, db, key):
+        row_id = self._get_id(db, key, self.TYPE_SET)
+        with self._conn.cursor() as cursor:
+            query = """
+                SELECT ICOUNT(elements)
+                FROM set_hashmap
+                WHERE id=%(id)s
+            """
+            cursor.execute(query, {'id': row_id})
+            row = cursor.fetchone()
+            return row[0] if row else 0
+
     def set(self, db, key, value, ex=None, mx=None, overwrite=True):
         if self.exists(db, key):
             self.delete(db, key)
@@ -235,18 +299,32 @@ class PostgresDao(object):
     def _get_set_element_ids(self, values):
         with self._conn.cursor() as cursor:
             query = """
-                INSERT INTO set_element_lookup(skey)
-                VALUES {values}
-                ON CONFLICT (skey)
-                DO UPDATE
-                  SET skey = excluded.skey
-                RETURNING id
-            """.format(
-                values=','.join(["('{v}')".format(v=v) for v in set(values)])
-            )
+                SELECT id, skey FROM set_element_lookup
+                WHERE skey IN %(values)s
+            """
 
-            cursor.execute(query)
-            return [element_id for [element_id] in cursor.fetchall()]
+            cursor.execute(query, {'values': tuple(values)})
+            rows = cursor.fetchall()
+            existing_ids = [row[0] for row in rows]
+            existing_skeys = [row[1] for row in rows]
+            print existing_ids
+
+            if set(existing_skeys) != set(values):
+                query = """
+                    INSERT INTO set_element_lookup(skey)
+                    VALUES {values}
+                    ON CONFLICT (skey)
+                    DO UPDATE
+                      SET skey=excluded.skey
+                    WHERE set_element_lookup.skey <> excluded.skey
+                    RETURNING id
+                """.format(
+                    values=','.join(["('{v}')".format(v=v) for v in set(values) - set(existing_skeys)])
+                )
+                cursor.execute(query)
+                return existing_ids + [element_id for [element_id] in cursor.fetchall()]
+            else:
+                return existing_ids
 
     def _get_id(self, db, key, key_type, create=False):
         entry_key = self._get_entry_key(db, key)
