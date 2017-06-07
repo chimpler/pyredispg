@@ -20,8 +20,10 @@ CREATE TABLE hashmap (
 );
 
 CREATE TABLE set_element_lookup (
-  skey VARCHAR PRIMARY KEY,
-  id SERIAL
+  db INT DEFAULT 0,
+  skey VARCHAR,
+  id SERIAL,
+  PRIMARY KEY(db, skey)
 );
 
 CREATE INDEX ON set_element_lookup(id);

@@ -92,8 +92,8 @@ hincrby				| :x:
 hincrbyfloat			| :x:
 hkeys				| :white_check_mark:
 hlen				| :white_check_mark:
-hmget				| :x:
-hmset				| :x:
+hmget				| :white_check_mark:
+hmset				| :white_check_mark:
 hset				| :white_check_mark:
 hsetnx				| :x:
 hstrlen				| :x:
@@ -175,7 +175,7 @@ sort				| :x:
 spop				| :x:
 srandmember			| :x:
 srem				| :x:
-strlen				| :x:
+strlen				| :white_check_mark:
 subscribe			| :x:
 sunion				| :x:
 sunionstore			| :x:

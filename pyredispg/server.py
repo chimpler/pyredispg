@@ -4,6 +4,7 @@ from pyhocon import ConfigFactory
 
 from pyredispg.exceptions import RedisWrongTypeException, RedisException
 from pyredispg.postgres_dao import PostgresDao
+from pyredispg.redis_info import RedisInfo
 from pyredispg.redis_wrapper import RedisWrapper
 from pyredispg.resp_reader import RespReader
 from pyredispg.resp_writer import RespWriter
@@ -14,9 +15,10 @@ class Server(object):
         self._server = StreamServer(('', 1234), self.handle_client)
         self._config = ConfigFactory.parse_file('config.hocon')
         self._dao = PostgresDao(self._config['postgres'])
+        self._redis_info = RedisInfo()
 
     def handle_client(self, sock, address):
-        ClientConnection(sock, self._config, self._dao).run()
+        ClientConnection(sock, self._config, self._dao, self._redis_info).run()
 
     def run(self):
         self._server.serve_forever()
@@ -27,14 +29,14 @@ class ClientConnection(object):
         'del': 'delete'
     }
 
-    def __init__(self, sock, config, dao):
+    def __init__(self, sock, config, dao, redis_info):
         self._config = config
         self._dao = dao
         self._sock = sock
         self._fp = sock.makefile()
         self._resp_reader = RespReader(self._fp)
         self._resp_writer = RespWriter(self._fp)
-        self._redis = RedisWrapper(self._dao)
+        self._redis = RedisWrapper(self._dao, redis_info)
 
     def _parse_command(self, instructions):
         command = self.COMMAND_MAPPING.get(instructions[0], instructions[0])

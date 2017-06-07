@@ -5,14 +5,16 @@ import sys
 import time
 
 from pyredispg.exceptions import RedisException
+from pyredispg.postgres_dao import KeyValue
 
 
 class RedisWrapper(object):
     COMMAND_FILE = 'command.json'
 
-    def __init__(self, dao):
+    def __init__(self, dao, redis_info):
         with open(os.path.join(sys.path[0], self.COMMAND_FILE)) as fd:
             self._command = json.loads(fd.read())
+        self._redis_info = redis_info
         self._dao = dao
         self._db = 0
 
@@ -29,17 +31,11 @@ class RedisWrapper(object):
         return 1 if self._dao.exists(self._db, key) else 0
 
     def flushall(self):
-        """
-        Do nothing in Postgres
-        :return: OK
-        """
+        self._dao.delete_all_dbs()
         return '+OK'
 
     def flushdb(self):
-        """
-        Do nothing in Postgres
-        :return: OK
-        """
+        self._dao.delete_db(self._db)
         return '+OK'
 
     def get(self, key):
@@ -73,12 +69,6 @@ class RedisWrapper(object):
             self._db = n
             return '+OK'
 
-    def hset(self, key, hkey, value):
-        return self._dao.hset(self._db, key, hkey, value)
-
-    def hget(self, key, hkey):
-        return self._dao.hget(self._db, key, hkey)
-
     def hexists(self, key, hkey):
         # convert boolean to 0 or 1
         return int(self._dao.hexists(self._db, key, hkey))
@@ -86,6 +76,19 @@ class RedisWrapper(object):
     def hdel(self, key, hkey):
         # convert boolean to 0 or 1
         return int(self._dao.hdel(self._db, key, hkey))
+
+    def hget(self, key, hkey):
+        return self._dao.hget(self._db, key, hkey)
+
+    def hmget(self, key, *hkeys):
+        return self._dao.hmget(self._db, key, hkeys)
+
+    def hset(self, key, hkey, value):
+        return self._dao.hset(self._db, key, hkey, value)
+
+    def hmset(self, key, *hkey_values):
+        key_vals = [KeyValue(hkey_values[i * 2], hkey_values[i * 2 + 1]) for i in range(len(hkey_values) / 2)]
+        return self._dao.hmset(self._db, key, key_vals)
 
     def hlen(self, key, hkey):
         return self._dao.hlen(self._db, key, hkey)
@@ -101,6 +104,16 @@ class RedisWrapper(object):
 
     def hlen(self, key):
         return self._dao.hlen(self._db, key)
+
+    def info(self):
+        return '\n\n'.join([
+            '# {title}\n{section}'.format(
+                title=title,
+                section='\n'.join(
+                   '{k}:{v}'.format(k=k, v=v) for k, v in kvdict.items()
+                )
+            ) for title, kvdict in self._redis_info.get_info().items()
+        ]) + '\n'
 
     def ping(self, value='PONG'):
         return value
