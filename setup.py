@@ -47,8 +47,9 @@ setup(
     ],
     install_requires=[
         'gevent',
+	'yoyo-migration',
         'psycopg2==2.6',
-        'pyhocon==0.3.35'
+        'pyhocon==0.3.35',
     ],
     tests_require=[
         'flake8',

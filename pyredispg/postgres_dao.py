@@ -97,6 +97,12 @@ class PostgresDao(object):
             else:
                 return None
 
+    def mget(self, db, keys):
+        with self._conn.cursor() as cursor:
+            cursor.execute("SELECT skey, value FROM global_hashmap JOIN key_entries USING (id) WHERE db=%(db)s AND skey IN %(keys)s", {'db': db, 'keys': tuple(keys)})
+            row_dict = dict([(row[0], row[1]) for row in cursor])
+            return [row_dict.get(key) for key in keys]
+
     def get_keys(self, db, pattern):
         with self._conn.cursor() as cursor:
             cursor.execute("SELECT skey FROM key_entries WHERE db=%s AND skey ILIKE %s", (db, pattern.replace('*', '%'),))
@@ -307,6 +313,12 @@ class PostgresDao(object):
             })
             row = cursor.fetchone()
             return int(row[0]) if row else 0
+
+    def persist(self, db, key):
+        row_id = self._get_id(db, key, self.TYPE_GLOBAL)
+        with self._conn.cursor() as cursor:
+            cursor.execute("UPDATE global_hashmap SET expiration_date=NULL WHERE id=%(id)s AND expiration_date IS NOT NULL", {'id': row_id})
+            return cursor.rowcount
 
     def sadd(self, db, key, values):
         row_id = self._get_id(db, key, self.TYPE_SET, True)

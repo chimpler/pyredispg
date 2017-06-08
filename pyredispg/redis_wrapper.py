@@ -18,6 +18,9 @@ class RedisWrapper(object):
         self._dao = dao
         self._db = 0
 
+    def cluster(self, command, *args):
+        return '-ERR This instance has cluster support disabled'
+
     def command(self):
         return self._command
 
@@ -41,33 +44,11 @@ class RedisWrapper(object):
     def get(self, key):
         return self._dao.get(self._db, key)
 
-    def type(self, key):
-        t = self._dao.type_str(self._db, key)
-        return '+' + (t if t else 'none')
-
     def keys(self, pattern):
         return self._dao.get_keys(self._db, pattern)
 
     def dbsize(self):
         return self._dao.dbsize()
-
-    def select(self, db):
-        def check_db():
-            try:
-                n = int(db)
-                if 0 <= n and n <= 15:
-                    return n
-                else:
-                    return None
-            except ValueError:
-                return None
-
-        n = check_db(db)
-        if n is None:
-            raise RedisException('invalid DB index')
-        else:
-            self._db = n
-            return '+OK'
 
     def hexists(self, key, hkey):
         # convert boolean to 0 or 1
@@ -115,6 +96,12 @@ class RedisWrapper(object):
             ) for title, kvdict in self._redis_info.get_info().items()
         ]) + '\n'
 
+    def mget(self, *keys):
+        return self._dao.mget(self._db, keys)
+
+    def persist(self, key):
+        return self._dao.persist(self._db, key)
+
     def ping(self, value='PONG'):
         return value
 
@@ -128,14 +115,34 @@ class RedisWrapper(object):
     def scard(self, key):
         return self._dao.scard(self._db, key)
 
+    def select(self, db):
+        def check_db():
+            try:
+                n = int(db)
+                if 0 <= n and n <= 15:
+                    return n
+                else:
+                    return None
+            except ValueError:
+                return None
+
+        n = check_db(db)
+        if n is None:
+            raise RedisException('invalid DB index')
+        else:
+            self._db = n
+            return '+OK'
+
     def smembers(self, key):
         return self._dao.smembers(self._db, key)
 
     def time(self):
-        t = time.time()
-        seconds = int(t)
-        millis = int((t - seconds) * 1000000)
-        return [
-            str(seconds),
-            str(millis)
-        ]
+        return self._redis_info.get_time()
+
+    def type(self, key):
+        t = self._dao.type_str(self._db, key)
+        return '+' + (t if t else 'none')
+
+    def unlink(self, key):
+        # Supposedly running the actual removal asynchronously
+        return self.delete(key)

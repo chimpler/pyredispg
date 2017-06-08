@@ -31,24 +31,24 @@ client getname			| :x:
 client pause			| :x:
 client reply			| :x:
 client setname			| :x:
-cluster addslots		| :x:
-cluster count-failure-reports	| :x:
-cluster countkeysinslot		| :x:
-cluster delslots		| :x:
-cluster failover		| :x:
-cluster forget			| :x:
-cluster getkeysinslot		| :x:
-cluster info			| :x:
-cluster keyslot			| :x:
-cluster meet			| :x:
-cluster nodes			| :x:
-cluster replicate		| :x:
-cluster reset			| :x:
-cluster saveconfig		| :x:
-cluster set-config-epoch	| :x:
-cluster setslot			| :x:
-cluster slaves			| :x:
-cluster slots			| :x:
+cluster addslots		| :white_check_mark:
+cluster count-failure-reports	| :white_check_mark:
+cluster countkeysinslot		| :white_check_mark:
+cluster delslots		| :white_check_mark:
+cluster failover		| :white_check_mark:
+cluster forget			| :white_check_mark:
+cluster getkeysinslot		| :white_check_mark:
+cluster info			| :white_check_mark
+cluster keyslot			| :white_check_mark:
+cluster meet			| :white_check_mark:
+cluster nodes			| :white_check_mark:
+cluster replicate		| :white_check_mark:
+cluster reset			| :white_check_mark:
+cluster saveconfig		| :white_check_mark:
+cluster set-config-epoch	| :white_check_mark:
+cluster setslot			| :white_check_mark:
+cluster slaves			| :white_check_mark:
+cluster slots			| :white_check_mark:
 command				| :white_check_mark:
 command count			| :x:
 command getkeys			| :x:
@@ -101,8 +101,8 @@ hvals				| :white_check_mark:
 incr				| :x:
 incrby				| :x:
 incrbyfloat			| :x:
-info				| :x:
-keys				| :x:
+info				| :construction:
+keys				| :white_check_mark:
 lastsave			| :x:
 lindex				| :x:
 linsert				| :x:
@@ -114,7 +114,7 @@ lrange				| :x:
 lrem				| :x:
 lset				| :x:
 ltrim				| :x:
-mget				| :x:
+mget				| :white_check_mark:
 migrate				| :x:
 monitor				| :x:
 move				| :x:
@@ -122,7 +122,7 @@ mset				| :x:
 msetnx				| :x:
 multi				| :x:
 object				| :x:
-persist				| :x:
+persist				| :white_check_mark:
 pexpire				| :x:
 pexpireat			| :x:
 pfadd				| :x:
@@ -158,7 +158,7 @@ script load			| :x:
 sdiff				| :x:
 sdiffstore			| :x:
 select				| :white_check_mark:
-set				| :white_check_mark: (TODO expire)
+set				| :construction:
 setbit				| :x:
 setex				| :x:
 setnx				| :x:
@@ -184,7 +184,7 @@ sync				| :x:
 time				| :white_check_mark:
 touch				| :x:
 ttl				| :x:
-type				| :x:
+type				| :white_check_mark:
 unsubscribe			| :x:
 unlink				| :x:
 unwatch				| :x:

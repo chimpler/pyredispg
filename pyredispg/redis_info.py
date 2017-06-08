@@ -3,24 +3,33 @@ from collections import OrderedDict
 
 import sys
 
+import time
+
 
 class RedisInfo(object):
+    def __init__(self):
+        self._start_time = time.time()
+
     def get_server_info(self):
+        uname_tokens = os.uname()
+        uname = ' '.join([uname_tokens[0], uname_tokens[2], uname_tokens[-1]])
+        is_64bits = sys.maxsize > 2 ** 32
+        num_seconds = int(time.time() - self._start_time)
         return OrderedDict([
             ('redis_version', '3.2.8'),
             ('redis_git_sha1', '00000000'),
             ('redis_git_dirty', 0),
             ('redis_build_id', 'b533f811ec736a0c'),
             ('redis_mode', 'standalone'),
-            ('os', 'Darwin 16.6.0 x86_64'),
-            ('arch_bits', 64),
+            ('os', uname),
+            ('arch_bits', 64 if is_64bits else 32),
             ('multiplexing_api', 'kqueue'),
             ('gcc_version', '4.2.1'),
-            ('process_id', 97572),
+            ('process_id', os.getpid()),
             ('run_id', '3b0d94deafc30c3ecf2ba3b7fe00db216050d3a8'),
             ('tcp_port', 6379),
-            ('uptime_in_seconds', 16463),
-            ('uptime_in_days', 0),
+            ('uptime_in_seconds', num_seconds),
+            ('uptime_in_days', num_seconds / (24 * 3600)),
             ('hz', 10),
             ('lru_clock', 3630551),
             ('executable', os.path.abspath(sys.argv[0])),
@@ -136,3 +145,12 @@ class RedisInfo(object):
             ('Cluster', self.get_cluster_info()),
             ('Keyspace', self.get_keyspace_info())
         ])
+
+    def get_time(self):
+        t = time.time()
+        seconds = int(t)
+        millis = int((t - seconds) * 1000000)
+        return [
+            str(seconds),
+            str(millis)
+        ]

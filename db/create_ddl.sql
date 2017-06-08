@@ -9,7 +9,7 @@ CREATE TABLE key_entries (
 CREATE TABLE global_hashmap (
   id INT PRIMARY KEY REFERENCES key_entries(id) ON DELETE CASCADE,
   value TEXT,
-  expiration_date TIMESTAMP
+  expiration_date TIMESTAMP DEFAULT NULL
 );
 
 CREATE TABLE hashmap (
